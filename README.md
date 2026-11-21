@@ -13,7 +13,7 @@ Acting as a real estate investment firm, we asked which census tracts in Boston 
 
 ## Approach
 
-![Project pipeline](images/pipeline.png)
+![Project pipeline](airbnb-investment-scoring/images/pipeline.png)
 
 The pipeline unifies six sources onto a common analytical unit, the 11 digit census tract GEOID, then models demand and rolls the drivers up into a weighted composite score.
 
@@ -21,7 +21,7 @@ The pipeline unifies six sources onto a common analytical unit, the 11 digit cen
 
 Six sources were spatially joined to 479 tract polygons: Inside Airbnb listings and reviews, Census ACS demographics, crime incident data, OpenStreetMap amenities, the EPA Smart Location Database for walkability, and an NLP pass over 234,160 guest reviews. The funnel below tracks how the raw records from each source collapse onto the tract grid.
 
-![Data funnel across all six sources](images/data_funnel.png)
+![Data funnel across all six sources](airbnb-investment-scoring/images/data_funnel.png)
 
 ## Cleaning and feature engineering
 
@@ -31,41 +31,41 @@ Getting trustworthy data onto one grid was the hardest part. 150K OpenStreetMap 
 
 The 640K review corpus was filtered to 234,160 English, neighborhood relevant reviews before modeling. BERTopic surfaced the themes guests actually talk about, and we kept the 10 topics with clear neighborhood content such as walkability, transit, and dining.
 
-![BERTopic topic distribution](images/bertopic_topics.png)
+![BERTopic topic distribution](airbnb-investment-scoring/images/bertopic_topics.png)
 
 VADER then scored sentiment, which was aggregated to the tract level as a neighborhood sentiment ratio.
 
-![VADER sentiment score distribution](images/sentiment_distribution.png)
+![VADER sentiment score distribution](airbnb-investment-scoring/images/sentiment_distribution.png)
 
 ## Crime labeling
 
 Crime incidents were classified into high, medium, and low severity. Human labels based on the FBI UCR system were compared against LLM generated labels on a 100 crime sample, 50 per city, to catch classification discrepancies before the labels fed the score. Crime was then mapped per tract.
 
-![Crime per capita, Boston](images/crime_per_capita_boston.png)
+![Crime per capita, Boston](airbnb-investment-scoring/images/crime_per_capita_boston.png)
 
 ## The model
 
 An OLS regression on the occupancy proxy identifies which features actually move demand, with a direction and a p-value for every one. These coefficients make the final weights transparent and defensible rather than arbitrary.
 
-![OLS coefficients](images/ols_coefficients.png)
+![OLS coefficients](airbnb-investment-scoring/images/ols_coefficients.png)
 
 ## Scoring framework
 
 The composite score combines four categories with domain weights: Demand 35 percent, Neighborhood Quality 30 percent, Accessibility 25 percent, and Amenities 10 percent. Within each category the absolute OLS betas are renormalized so the within group weights sum to one.
 
-![Within-group feature weights](images/scoring_weights.png)
+![Within-group feature weights](airbnb-investment-scoring/images/scoring_weights.png)
 
 ## Results
 
 High scoring tracts cluster in recognizable places: the downtown core and South Boston Waterfront in Boston, and two distinct hotspots in San Francisco, the Financial District corridor and a western arc through Presidio and Western Addition.
 
-![Investment score, Boston](images/investment_score_boston.png)
+![Investment score, Boston](airbnb-investment-scoring/images/investment_score_boston.png)
 
-![Investment score, San Francisco](images/investment_score_sf.png)
+![Investment score, San Francisco](airbnb-investment-scoring/images/investment_score_sf.png)
 
 The top tracts are not interchangeable. Presidio leads on demand and quality with only 17 active listings, a high satisfaction, low competition market. Western Addition carries the highest guest sentiment in the dataset at 0.994. South Boston Waterfront tops Boston on quality, driven by a median household income near $218K and very low crime.
 
-![Top three tracts per city](images/top_tracts.png)
+![Top three tracts per city](airbnb-investment-scoring/images/top_tracts.png)
 
 ## Repository structure
 
